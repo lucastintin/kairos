@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const BatidaSchema = new mongoose.Schema({
+    userID:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'usuario'
+    },
     dtHoraBatida: {
         type: Date,
         required: true
@@ -13,3 +17,5 @@ const BatidaSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+module.exports = Batida = mongoose.model('batida', BatidaSchema);

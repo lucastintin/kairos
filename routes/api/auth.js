@@ -7,7 +7,7 @@ const bcrypt    = require('bcryptjs');
 
 //Models
 const Usuario = require('../../models/Usuario.model');
-//const Empresa = require('../../models/Empresa.model');
+const Empresa = require('../../models/Empresa.model');
 
 //@route    GET api/auth
 //@desc     Rota de Teste
@@ -64,29 +64,29 @@ router.post('/usuario', async (req, res) => {
     }
 });
 
-//@route    POST api/auth/empresas
-//@desc     Rota de Login de Empresas
+//@route    POST api/auth/empresa
+//@desc     Rota de Login de Empresa
 //@access   public
 router.post('/empresa', async (req, res) => {
 
-    const { email, senha } = req.body;
+    const { cnpj, senha } = req.body;
 
     try {
-        let usuario = '';// await Empresa.findOne({ email });
+        let empresa = await Empresa.findOne({ cnpj });
 
-        if (!usuario) {
-            res.status(400).json({ errors: [{ msg: 'Usuário não cadastrado' }] });
+        if (!empresa) {
+            res.status(400).json({ errors: [{ msg: 'Empresa não cadastrada.' }] });
         }
 
-        const isMatch = await bcrypt.compare(senha, usuario.senha);
+        const isMatch = await bcrypt.compare(senha, empresa.senha);
 
         if (!isMatch) {
             res.status(400).json({ errors: [{ msg: 'Credenciais inválidos' }] });
         }
 
         const payload = {
-            usuario: {
-                id: usuario.id
+            empresa: {
+                id: empresa.id
             }
         }
 
@@ -99,6 +99,7 @@ router.post('/empresa', async (req, res) => {
                 res.json({ token });
             }
         );
+        
     } catch (err) {
        console.error(err.message);
        res.status(500).send('Erro 002 no Servidor de Autenticação');

@@ -14,6 +14,17 @@ const UsuarioSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    setor: {
+        type: String
+    },
+    nivel: {
+        type: Number,
+        default: 1
+    },
+    empresaID:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'empresa'
+    },
     createdAt: {
         type: Date,
         default: Date.now

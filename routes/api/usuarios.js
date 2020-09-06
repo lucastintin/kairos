@@ -14,7 +14,7 @@ router.get('/teste', (req, res) => res.send('Rota de Usuários'));
 //@access   public
 router.post('/', async (req, res) => {
 
-    const { nome, email, senha } = req.body;
+    const { nome, email, senha, nivel, setor } = req.body;
 
     try {
         let usuario = await Usuario.findOne({ email });
@@ -26,7 +26,9 @@ router.post('/', async (req, res) => {
         usuario = new Usuario({
             nome,
             email, 
-            senha
+            senha,
+            nivel, 
+            setor
         });
 
         const salt = await bcrypt.genSalt(10);
