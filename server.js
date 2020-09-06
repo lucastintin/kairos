@@ -13,9 +13,10 @@ app.get('/', (req, res) => {
 });
 
 //Rotas da Aplicação
-app.use('/api/batidas', require('./routes/api/batidas'));
-app.use('/api/usuarios', require('./routes/api/usuarios'));
 app.use('/api/auth', require('./routes/api/auth'));
+//app.use('/api/empresas', require('./routes/api/empresas'));
+app.use('/api/usuarios', require('./routes/api/usuarios'));
+app.use('/api/batidas', require('./routes/api/batidas'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, ()=> {

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const BatidaSchema = new mongoose.Schema({
-    userID:{
+    usuarioID:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'usuario'
     },
@@ -11,6 +11,12 @@ const BatidaSchema = new mongoose.Schema({
     },
     justificativa:{
         type:String
+    },
+    enderecoIP: {
+        type: String
+    },
+    userAgent:{
+        type: String
     },
     createdAt:{
         type:Date,
