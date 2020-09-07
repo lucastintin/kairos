@@ -120,5 +120,49 @@ router.post('/abono', auth,  async (req, res) => {
     }
 });
 
+//@route    GET api/batidas/minhas
+//@desc     Rota de Listagem de Batidas - READ
+//@access   private
+router.get('/minhas', auth,  async (req, res) => {
+
+    try {        
+        let batidas = await Batida.find().where('usuarioID').equals(req.usuarioId).sort('dtHoraBatida');
+
+        res.status(200).json({ batidas })
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erro na rota bat004');
+    }
+});
+
+//@route    GET api/batidas/minhas
+//@desc     Rota de Listagem de Batidas por Dia - READ
+//@access   private
+router.get('/minhas/dia/:dia', auth,  async (req, res) => {
+
+    try {        
+        let dia  = req.params.dia + "T00:01:00Z";
+        //Corrigir aqui embaixo quando migrar para so servidor
+        dia = moment(new Date(dia)).add('3', 'hour'); 
+       
+        const inicioDia = dia.startOf('day').toISOString();
+        const fimDia = dia.endOf('day').toISOString();
+
+        let batidas = await Batida.find({
+            usuarioID: req.usuarioId,
+            dtHoraBatida: {
+                $gte: inicioDia,
+                $lt: fimDia
+            }
+        });
+
+        res.status(200).json({ batidas })
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erro na rota bat004');
+    }
+});
 
 module.exports = router;
