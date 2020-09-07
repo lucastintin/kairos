@@ -136,7 +136,7 @@ router.get('/minhas', auth,  async (req, res) => {
     }
 });
 
-//@route    GET api/batidas/minhas
+//@route    GET api/batidas/minhas/dia/2020-09-06
 //@desc     Rota de Listagem de Batidas por Dia - READ
 //@access   private
 router.get('/minhas/dia/:dia', auth,  async (req, res) => {
@@ -161,8 +161,123 @@ router.get('/minhas/dia/:dia', auth,  async (req, res) => {
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat004');
+        res.status(500).send('Erro na rota bat005');
     }
 });
+
+//@route    GET api/batidas/minhas/mes/2020-09
+//@desc     Rota de Listagem de Batidas por Mes - READ
+//@access   private
+router.get('/minhas/mes/:mes', auth,  async (req, res) => {
+
+    try {        
+        let mes  = req.params.mes + "T00:01:00Z";
+        //Corrigir aqui embaixo quando migrar para so servidor
+        mes = moment(new Date(mes)).add('3', 'hour'); 
+       
+        const inicioMes = mes.startOf('month').toISOString();
+        const fimMes = mes.endOf('month').toISOString();
+
+        let batidas = await Batida.find({
+            usuarioID: req.usuarioId,
+            dtHoraBatida: {
+                $gte: inicioMes,
+                $lt: fimMes
+            }
+        });
+
+        res.status(200).json({ batidas })
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erro na rota bat006');
+    }
+});
+
+//@route    POST api/batidas/funcionario/dia
+//@desc     Rota de Listagem (Resumo) de Batidas de um Usuário por Dia - READ
+//@access   private
+router.post('/funcionario/dia', auth,  async (req, res) => {
+
+    try {        
+        const gestorId = req.usuarioId;
+        let gestor = await Usuario.findById({ _id: gestorId })
+
+        if (gestor.nivel == 1)  {
+            return res.status(400).json({ errors: [{ msg: 'Você não tem permissão para ver as batidas desse usuário.' }] });
+        }
+
+        let { email, dia } = req.body;
+
+
+        let funcionario = await Usuario.findOne({ email });
+        if (!funcionario) {
+            res.status(400).json({ errors: [{ msg: 'Email não encontrado' }] });
+        }
+
+        //Corrigir aqui
+        dia = moment(new Date(dia)).add('3', 'hour'); 
+       
+        const inicioDia = dia.startOf('day').toISOString();
+        const fimDia = dia.endOf('day').toISOString();
+
+        let batidas = await Batida.find({
+            usuarioID: funcionario.id,
+            dtHoraBatida: {
+                $gte: inicioDia,
+                $lt: fimDia
+            }
+        });
+
+        res.status(200).json({ batidas });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erro na rota bat007');
+    }
+});
+
+//@route    POST api/batidas/funcionario/mes
+//@desc     Rota de Listagem (Resumo) de Batidas de um Usuário por Mes - READ
+//@access   private
+router.post('/funcionario/mes', auth,  async (req, res) => {
+
+    try {        
+        const gestorId = req.usuarioId;
+        let gestor = await Usuario.findById({ _id: gestorId });
+
+        if (gestor.nivel == 1)  {
+            return res.status(400).json({ errors: [{ msg: 'Você não tem permissão para ver as batidas desse usuário.' }] });
+        }
+
+        let { email, mes } = req.body;
+
+        let funcionario = await Usuario.findOne({ email });
+        if (!funcionario) {
+            res.status(400).json({ errors: [{ msg: 'Email não encontrado' }] });
+        }
+
+        //Corrigir aqui
+        mes = moment(new Date(mes)).add('3', 'hour'); 
+       
+        const inicioMes = mes.startOf('month').toISOString();
+        const fimMes = mes.endOf('month').toISOString();
+
+        let batidas = await Batida.find({
+            usuarioID: funcionario.id,
+            dtHoraBatida: {
+                $gte: inicioMes,
+                $lt: fimMes
+            }
+        });
+
+        res.status(200).json({ batidas });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erro na rota bat008');
+    }
+});
+
 
 module.exports = router;
