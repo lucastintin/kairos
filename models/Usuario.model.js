@@ -17,6 +17,12 @@ const UsuarioSchema = new mongoose.Schema({
     setor: {
         type: String
     },
+    cargo: {
+        type: String
+    },
+    dtAdmissao: {
+        type: Date
+    },
     nivel: {
         type: Number,
         default: 1

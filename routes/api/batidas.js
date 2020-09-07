@@ -27,6 +27,7 @@ router.post('/', auth, async (req, res) => {
             usuarioID: req.usuarioId,
             dtHoraBatida,
             justificativa,
+            obs: "MANUAL",
             enderecoIP: req.ip,
             userAgent: req.userAgent
         })
@@ -66,7 +67,7 @@ router.post('/automatica', async (req, res) => {
         let batida = new Batida({
             usuarioID: usuario.id,
             dtHoraBatida,
-            justificativa: "Automática",
+            obs: "AUTOMATICA",
             enderecoIP: req.ip,
             userAgent: req.userAgent
         })
@@ -94,7 +95,7 @@ router.post('/abono', auth,  async (req, res) => {
             return res.status(400).json({ errors: [{ msg: 'Usuário não tem permissão para abonar' }] });
         }
 
-        let { email, dtHoraBatida } = req.body;
+        let { email, dtHoraBatida, justificativa } = req.body;
 
         let funcionario = await Usuario.findOne({ email });
         if (!funcionario) {
@@ -106,7 +107,8 @@ router.post('/abono', auth,  async (req, res) => {
         let batida = new Batida({
             usuarioID: funcionario.id,
             dtHoraBatida,
-            justificativa: `Abono por ${gestor.email}`,
+            justificativa,
+            obs: `ABONO por ${gestor.email}`,
             enderecoIP: req.ip,
             userAgent: req.userAgent
         })

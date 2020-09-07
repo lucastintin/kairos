@@ -12,6 +12,9 @@ const BatidaSchema = new mongoose.Schema({
     justificativa:{
         type:String
     },
+    obs:{
+        type:String
+    },
     enderecoIP: {
         type: String
     },
