@@ -27,6 +27,10 @@ const UsuarioSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
+    batidasPonto: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'batida'
+    }],
     empresaID:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'empresa'

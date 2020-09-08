@@ -33,11 +33,11 @@ router.post('/', auth, async (req, res) => {
         })
         await batida.save();
 
-        res.status(200).send('Batida registrada com sucesso.');
+        return res.status(200).send('Batida registrada com sucesso.');
 
     } catch (err) {
        console.error(err.message);
-       res.status(500).send('Erro na rota bat001');
+       return res.status(500).send('Erro na rota bat001');
     }
 });
 
@@ -73,11 +73,11 @@ router.post('/automatica', async (req, res) => {
         })
         await batida.save();
 
-        res.status(200).send('Batida registrada com sucesso.');
+        return res.status(200).send('Batida registrada com sucesso.');
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat002');
+        return res.status(500).send('Erro na rota bat002');
     }
 });
 
@@ -114,11 +114,11 @@ router.post('/abono', auth,  async (req, res) => {
         })
         await batida.save();
 
-        res.status(200).send('Batida registrada com sucesso.');
+        return res.status(200).send('Batida registrada com sucesso.');
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat003');
+        return res.status(500).send('Erro na rota bat003');
     }
 });
 
@@ -130,11 +130,11 @@ router.get('/minhas', auth,  async (req, res) => {
     try {        
         let batidas = await Batida.find().where('usuarioID').equals(req.usuarioId).sort('dtHoraBatida');
 
-        res.status(200).json({ batidas })
+        return res.status(200).json({ batidas })
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat004');
+        return res.status(500).send('Erro na rota bat004');
     }
 });
 
@@ -159,11 +159,11 @@ router.get('/minhas/dia/:dia', auth,  async (req, res) => {
             }
         });
 
-        res.status(200).json({ batidas })
+        return res.status(200).json({ batidas });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat005');
+        return res.status(500).send('Erro na rota bat005');
     }
 });
 
@@ -188,11 +188,11 @@ router.get('/minhas/mes/:mes', auth,  async (req, res) => {
             }
         });
 
-        res.status(200).json({ batidas })
+        return res.status(200).json({ batidas });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat006');
+        return res.status(500).send('Erro na rota bat006');
     }
 });
 
@@ -214,7 +214,7 @@ router.post('/funcionario/dia', auth,  async (req, res) => {
 
         let funcionario = await Usuario.findOne({ email });
         if (!funcionario) {
-            res.status(400).json({ errors: [{ msg: 'Email não encontrado' }] });
+            return res.status(400).json({ errors: [{ msg: 'Email não encontrado' }] });
         }
 
         //Corrigir aqui
@@ -231,11 +231,11 @@ router.post('/funcionario/dia', auth,  async (req, res) => {
             }
         });
 
-        res.status(200).json({ batidas });
+        return res.status(200).json({ batidas });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat007');
+        return res.status(500).send('Erro na rota bat007');
     }
 });
 
@@ -256,7 +256,7 @@ router.post('/funcionario/mes', auth,  async (req, res) => {
 
         let funcionario = await Usuario.findOne({ email });
         if (!funcionario) {
-            res.status(400).json({ errors: [{ msg: 'Email não encontrado' }] });
+            return res.status(400).json({ errors: [{ msg: 'Email não encontrado' }] });
         }
 
         //Corrigir aqui
@@ -273,13 +273,106 @@ router.post('/funcionario/mes', auth,  async (req, res) => {
             }
         });
 
-        res.status(200).json({ batidas });
+        return res.status(200).json({ batidas });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro na rota bat008');
+        return res.status(500).send('Erro na rota bat008');
     }
 });
 
+//@route    POST api/batidas/setor/dia
+//@desc     Rota de Listagem (Resumo) de Batidas de um Setor por Dia - READ
+//@access   private
+router.post('/setor/dia', auth,  async (req, res) => {
+
+    try {        
+        const gestorId = req.usuarioId;
+        let gestor = await Usuario.findById({ _id: gestorId })
+
+        if (gestor.nivel == 1)  {
+            return res.status(400).json({ errors: [{ msg: 'Você não tem permissão para ver as batidas desse usuário.' }] });
+        }
+
+        let { setor, dia } = req.body;
+
+        //Corrigir aqui
+        dia = moment(new Date(dia)).add('3', 'hour'); 
+       
+        const inicioDia = dia.startOf('day').toISOString();
+        const fimDia = dia.endOf('day').toISOString();
+
+        let funcionarios = await Usuario.find({ setor });
+        if (!funcionarios) {
+            return res.status(400).json({ errors: [{ msg: 'Não foram encontrados funcinários para esse setor.' }] });
+        }
+
+        let batidasFuncionarios = [];
+        for (let index = 0; index < funcionarios.length; index++) {
+            batidasFuncionarios.push(
+                await Batida.find({
+                    usuarioID: funcionarios[index].id,
+                    dtHoraBatida: {
+                        $gte: inicioDia,
+                        $lt: fimDia
+                    }
+                })
+            )
+        }
+        
+        return res.status(200).json({ batidasFuncionarios });
+
+    } catch (err) {
+        console.error(err.message);
+        return res.status(500).send('Erro na rota bat009');
+    }
+});
+
+//@route    POST api/batidas/setor/mes
+//@desc     Rota de Listagem (Resumo) de Batidas de um Setor por Mes - READ
+//@access   private
+router.post('/setor/mes', auth,  async (req, res) => {
+
+    try {        
+        const gestorId = req.usuarioId;
+        let gestor = await Usuario.findById({ _id: gestorId })
+
+        if (gestor.nivel == 1)  {
+            return res.status(400).json({ errors: [{ msg: 'Você não tem permissão para ver as batidas desse usuário.' }] });
+        }
+        
+        let { setor, dia } = req.body;
+
+        //Corrigir aqui
+        dia = moment(new Date(dia)).add('3', 'hour'); 
+       
+        const inicioMes = dia.startOf('month').toISOString();
+        const fimMes = dia.endOf('month').toISOString();
+
+        let funcionarios = await Usuario.find({ setor });
+        if (!funcionarios) {
+            return res.status(400).json({ errors: [{ msg: 'Não foram encontrados funcinários para esse setor.' }] });
+        }
+
+        let batidasFuncionarios = [];
+        for (let index = 0; index < funcionarios.length; index++) {
+            batidasFuncionarios.push(
+                await Batida.find({
+                    usuarioID: funcionarios[index].id,
+                    dtHoraBatida: {
+                        $gte: inicioMes,
+                        $lt: fimMes
+                    }
+                })
+            )
+        }
+        
+        return res.status(200).json({ batidasFuncionarios });
+
+    } catch (err) {
+        console.error(err.message);
+        return res.status(500).send('Erro na rota bat009');
+    }
+});
 
 module.exports = router;

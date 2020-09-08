@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const BatidaSchema = new mongoose.Schema({
     usuarioID:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'usuario'
+        type: mongoose.Schema.Types.ObjectId
     },
     dtHoraBatida: {
         type: Date,

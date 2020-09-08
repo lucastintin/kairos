@@ -22,6 +22,10 @@ const EmpresaSchema = new mongoose.Schema({
         type: String,
         required: true
     }],
+    funcionarios: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'usuario'
+    }],
     habilitado: {
         type: Boolean,
         default: true,
